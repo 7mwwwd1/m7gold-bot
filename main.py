@@ -1,31 +1,21 @@
 import os
-from flask import Flask
-from twilio.rest import Client
+from flask import Flask, request
+from twilio.twiml.messaging_response import MessagingResponse
 
 app = Flask(__name__)
 
-@app.route("/")
-def home():
-    return "M7GOLD Bot is running!"
+@app.route("/whatsapp", methods=["POST"])
+def whatsapp_reply():
+    incoming_msg = request.values.get("Body", "").lower()
+    resp = MessagingResponse()
+    msg = resp.message()
 
-# Send WhatsApp message on startup
-def send_whatsapp_message():
-    account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
-    auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
-    client = Client(account_sid, auth_token)
+    if "توصية" in incoming_msg:
+        msg.body("توصية ذهب تجريبية: شراء من 3215، الهدف 3225، وقف الخسارة 3205.")
+    else:
+        msg.body("مرحباً! أرسل كلمة 'توصية' للحصول على توصية ذهب.")
 
-    message = client.messages.create(
-        from_="whatsapp:+14155238886",
-        to="whatsapp:+971556868131",
-        body="توصية ذهب تجريبية:
-شراء من 3215
-الهدف 3225
-وقف الخسارة 3205
-(تلقائي عند تشغيل البوت)"
-    )
-    print(f"Message SID: {message.sid}")
+    return str(resp)
 
 if __name__ == "__main__":
-    send_whatsapp_message()
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=10000)
